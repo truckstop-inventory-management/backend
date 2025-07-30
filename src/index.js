@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import inventoryRoutes from './routes/inventoryRoutes.js';
+import authRoutes from './routes/authRoutes.js'; // ✅ Import auth routes
 
 dotenv.config();
 
@@ -13,6 +14,7 @@ app.use(cors({ origin: 'https://your-netlify-frontend.netlify.app' }));
 app.use(express.json());
 
 // Routes
+app.use('/api/auth', authRoutes);        // ✅ Add this line
 app.use('/api/inventory', inventoryRoutes);
 
 app.get('/', (req, res) => res.send('Truckstop Inventory API is running'));
