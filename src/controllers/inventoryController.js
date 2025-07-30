@@ -1,20 +1,52 @@
-// src/controllers/inventoryController.js
-
-// Example inventory data (you will replace with CouchDB later)
-let inventory = [
-  { id: 1, name: 'Tires', quantity: 50 },
-  { id: 2, name: 'Oil', quantity: 30 }
-];
+import { inventoryDB } from '../config/config.js';
 
 // GET all inventory items
-export const getInventory = (req, res) => {
-  res.json(inventory);
+export const getInventory = async (req, res) => {
+  try {
+    const result = await inventoryDB.list({ include_docs: true });
+    const items = result.rows.map(row => row.doc);
+    res.json(items);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch inventory', details: err.message });
+  }
 };
 
-// ADD a new inventory item
-export const addItem = (req, res) => {
-  const { name, quantity } = req.body;
-  const newItem = { id: Date.now(), name, quantity };
-  inventory.push(newItem);
-  res.status(201).json(newItem);
+// ADD new item
+export const addItem = async (req, res) => {
+  try {
+    const { name, quantity } = req.body;
+    const newItem = { name, quantity, createdAt: new Date().toISOString() };
+    const response = await inventoryDB.insert(newItem);
+    res.status(201).json({ id: response.id, ...newItem });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to add item', details: err.message });
+  }
+};
+
+// UPDATE existing item
+export const updateItem = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, quantity } = req.body;
+
+    const doc = await inventoryDB.get(id);
+    const updatedItem = { ...doc, name, quantity, updatedAt: new Date().toISOString() };
+
+    const response = await inventoryDB.insert(updatedItem);
+    res.json({ id: response.id, ...updatedItem });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update item', details: err.message });
+  }
+};
+
+// DELETE item
+export const deleteItem = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const doc = await inventoryDB.get(id);
+    await inventoryDB.destroy(doc._id, doc._rev);
+    res.json({ message: 'Item deleted successfully', id });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete item', details: err.message });
+  }
 };
