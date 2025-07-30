@@ -39,7 +39,7 @@ export const updateItem = async (req, res) => {
   }
 };
 
-// DELETE item
+// DELETE item (ensure this is present and correctly exported)
 export const deleteItem = async (req, res) => {
   try {
     const { id } = req.params;
