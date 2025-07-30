@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { inventoryDB } from './config/config.js';
 import inventoryRoutes from './routes/inventoryRoutes.js';
 import authRoutes from './routes/authRoutes.js'; // Import auth routes
 
@@ -20,3 +21,12 @@ app.use('/api/inventory', inventoryRoutes);
 app.get('/', (req, res) => res.send('Truckstop Inventory API is running'));
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+app.get('/api/db-check', async (req, res) => {
+  try {
+    const info = await inventoryDB.info();
+    res.json({ message: 'Connected to CouchDB', db: info });
+  } catch (err) {
+    res.status(500).json({ message: 'CouchDB connection failed', error: err.message });
+  }
+});
