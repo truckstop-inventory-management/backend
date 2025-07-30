@@ -1,8 +1,6 @@
+import nano from 'nano';
 import dotenv from 'dotenv';
 dotenv.config();
 
-export default {
-  port: process.env.PORT || 5000,
-  dbUrl: process.env.DATABASE_URL || '',
-  jwtSecret: process.env.JWT_SECRET || 'defaultsecret'
-};
+const couch = nano(process.env.COUCHDB_URL); 
+export default couch;
