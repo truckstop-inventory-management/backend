@@ -17,7 +17,8 @@ mongoose.connect('mongodb+srv://admin:admin@truckstop-inventory-clu.ioozj2k.mong
   .catch(err => console.error('❌ MongoDB connection error:', err));
 
 // Middleware
-app.use(cors({ origin: 'https://your-netlify-frontend.netlify.app' }));
+app.use(cors());
+//app.use(cors({ origin: 'https://your-netlify-frontend.netlify.app' }));
 app.use(express.json());
 
 // Routes
