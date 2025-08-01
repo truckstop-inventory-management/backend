@@ -1,52 +1,50 @@
-import { inventoryDB } from '../config/config.js';
+import Inventory from '../models/inventoryModel.js';
 
-// GET all inventory items
-export const getInventory = async (req, res) => {
+export const createInventory = async (req, res) => {
   try {
-    const result = await inventoryDB.list({ include_docs: true });
-    const items = result.rows.map(row => row.doc);
+    const newItem = new Inventory(req.body);
+    const savedItem = await newItem.save();
+    res.status(201).json(savedItem);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+export const getAllInventory = async (req, res) => {
+  try {
+    const items = await Inventory.find();
     res.json(items);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch inventory', details: err.message });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
-// ADD new item
-export const addItem = async (req, res) => {
+export const getInventoryById = async (req, res) => {
   try {
-    const { name, quantity } = req.body;
-    const newItem = { name, quantity, createdAt: new Date().toISOString() };
-    const response = await inventoryDB.insert(newItem);
-    res.status(201).json({ id: response.id, ...newItem });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to add item', details: err.message });
+    const item = await Inventory.findById(req.params.id);
+    if (!item) return res.status(404).json({ message: 'Item not found' });
+    res.json(item);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
-// UPDATE existing item
-export const updateItem = async (req, res) => {
+export const updateInventory = async (req, res) => {
   try {
-    const { id } = req.params;
-    const { name, quantity } = req.body;
-
-    const doc = await inventoryDB.get(id);
-    const updatedItem = { ...doc, name, quantity, updatedAt: new Date().toISOString() };
-
-    const response = await inventoryDB.insert(updatedItem);
-    res.json({ id: response.id, ...updatedItem });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to update item', details: err.message });
+    const updatedItem = await Inventory.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!updatedItem) return res.status(404).json({ message: 'Item not found' });
+    res.json(updatedItem);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 };
 
-// DELETE item (ensure this is present and correctly exported)
-export const deleteItem = async (req, res) => {
+export const deleteInventory = async (req, res) => {
   try {
-    const { id } = req.params;
-    const doc = await inventoryDB.get(id);
-    await inventoryDB.destroy(doc._id, doc._rev);
-    res.json({ message: 'Item deleted successfully', id });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to delete item', details: err.message });
+    const deletedItem = await Inventory.findByIdAndDelete(req.params.id);
+    if (!deletedItem) return res.status(404).json({ message: 'Item not found' });
+    res.json({ message: 'Item deleted' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };

@@ -1,52 +1,48 @@
 import axios from 'axios';
 
-// === CONFIGURATION ===
-const BASE_URL = 'https://backend-nlxq.onrender.com/api/inventory';
-const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWF0IjoxNzU0MDU2OTQxLCJleHAiOjE3NTQwNjA1NDF9.EqyS84iz5ooUhgYADMgtL3iC3MaR0xuQGGBN6gYksrU';
-
-const headers = { Authorization: `Bearer ${TOKEN}`, 'Content-Type': 'application/json' };
-
-function logStep(step, message, data = null) {
-  console.log(`\n🔹 [${step}] ${message}`);
-  if (data) console.log(JSON.stringify(data, null, 2));
-}
+const API_BASE = 'http://localhost:5050/api/inventory';  // adjust if needed
 
 async function runCrudTests() {
   try {
-    // ✅ 1. VERIFY TOKEN
-    logStep('1', 'Verifying token and fetching inventory...');
-    const readRes = await axios.get(BASE_URL, { headers });
-    logStep('READ', 'Inventory fetched', readRes.data);
+    console.log('--- Starting CRUD tests ---');
 
-    // ✅ 2. CREATE ITEM
-    logStep('2', 'Creating new item...');
-    const newItem = { name: 'Test Brake Fluid', quantity: 25 };
-    const createRes = await axios.post(BASE_URL, newItem, { headers });
-    logStep('CREATE', 'Item created', createRes.data);
+    // 1. CREATE an inventory item
+    const newItem = {
+      itemName: 'Automated Test Item',
+      quantity: 5,
+      price: 25.5,
+      location: 'Test Warehouse',
+    };
+    const createRes = await axios.post(API_BASE, newItem);
+    console.log('CREATE response:', createRes.data);
 
-    const itemId = createRes.data.id; // ✅ FIXED: Use `id` instead of `_id`
+    const createdId = createRes.data._id;
+    if (!createdId) throw new Error('Create failed: No ID returned');
 
+    // 2. READ all items
+    const readAllRes = await axios.get(API_BASE);
+    console.log('READ ALL response:', readAllRes.data);
 
-    // ✅ 3. UPDATE ITEM
-    logStep('3', `Updating item ${itemId}...`);
-    const updatedItem = { quantity: 40 };
-    const updateRes = await axios.put(`${BASE_URL}/${itemId}`, updatedItem, { headers });
-    logStep('UPDATE', 'Item updated', updateRes.data);
+    // 3. READ the created item by ID
+    const readOneRes = await axios.get(`${API_BASE}/${createdId}`);
+    console.log('READ ONE response:', readOneRes.data);
 
-    // ✅ 4. DELETE ITEM
-    logStep('4', `Deleting item ${itemId}...`);
-    const deleteRes = await axios.delete(`${BASE_URL}/${itemId}`, { headers });
-    logStep('DELETE', 'Item deleted', deleteRes.data);
+    // 4. UPDATE the created item
+    const updatedData = {
+      quantity: 10,
+      price: 30.0,
+      location: 'Updated Warehouse',
+    };
+    const updateRes = await axios.put(`${API_BASE}/${createdId}`, updatedData);
+    console.log('UPDATE response:', updateRes.data);
 
-    // ✅ 5. FINAL READ
-    logStep('5', 'Fetching inventory after CRUD...');
-    const finalRead = await axios.get(BASE_URL, { headers });
-    logStep('FINAL READ', 'Inventory now', finalRead.data);
+    // 5. DELETE the created item
+    const deleteRes = await axios.delete(`${API_BASE}/${createdId}`);
+    console.log('DELETE response:', deleteRes.data);
 
-    console.log('\n✅ CRUD Automation Completed Successfully!\n');
-  } catch (error) {
-    console.error('\n❌ ERROR OCCURRED:', error.response?.data || error.message);
-    process.exit(1);
+    console.log('--- CRUD tests completed successfully ---');
+  } catch (err) {
+    console.error('CRUD test error:', err.response ? err.response.data : err.message);
   }
 }
 
