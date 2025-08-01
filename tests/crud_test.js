@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // === CONFIGURATION ===
 const BASE_URL = 'https://backend-nlxq.onrender.com/api/inventory';
-const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWF0IjoxNzU0MDUzNTg4LCJleHAiOjE3NTQwNTcxODh9.TUptBuYoIaTkr5NFYqmDhwOYOiRoum5xeAGsyzIXMMk';
+const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWF0IjoxNzU0MDU2OTQxLCJleHAiOjE3NTQwNjA1NDF9.EqyS84iz5ooUhgYADMgtL3iC3MaR0xuQGGBN6gYksrU';
 
 const headers = { Authorization: `Bearer ${TOKEN}`, 'Content-Type': 'application/json' };
 
