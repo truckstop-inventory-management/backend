@@ -10,7 +10,6 @@ import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.get('/', protect, getInventory);
 router.post('/', protect, createInventory);
 router.get('/:id', protect, getInventoryById);
 router.put('/:id', protect, updateInventory);
