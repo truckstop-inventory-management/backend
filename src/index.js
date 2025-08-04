@@ -20,7 +20,7 @@ mongoose.connect(process.env.MONGO_URI, {
 .catch(err => console.error('❌ MongoDB connection error:', err));
 
 // Middleware
-app.use(cors({ origin: 'https://your-netlify-frontend.netlify.app' }));
+app.use(cors({ origin: 'https://truckstop-inventory-management.netlify.app/' }));
 app.use(express.json());
 
 // Routes
