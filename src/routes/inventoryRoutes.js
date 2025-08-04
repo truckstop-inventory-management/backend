@@ -1,18 +1,19 @@
 import express from 'express';
 import {
-  createInventory,
-  getAllInventory,
+  getInventory,
   getInventoryById,
+  createInventory,
   updateInventory,
   deleteInventory,
 } from '../controllers/inventoryController.js';
+import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.post('/', createInventory);
-router.get('/', getAllInventory);
-router.get('/:id', getInventoryById);          // <-- Add this line for GET by ID
-router.put('/:id', updateInventory);
-router.delete('/:id', deleteInventory);
+router.get('/', protect, getInventory);
+router.post('/', protect, createInventory);
+router.get('/:id', protect, getInventoryById);
+router.put('/:id', protect, updateInventory);
+router.delete('/:id', protect, deleteInventory);
 
 export default router;

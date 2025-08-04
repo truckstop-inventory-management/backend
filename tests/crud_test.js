@@ -1,48 +1,72 @@
 import axios from 'axios';
 
-const API_BASE = 'http://localhost:5050/api/inventory';  // adjust if needed
+const BASE_URL = 'https://backend-nlxq.onrender.com/api';
+const USERNAME = 'testuser';       // Use your test user
+const PASSWORD = 'Test@1234'; // Use the correct password
+
+async function getAuthToken() {
+  try {
+    const response = await axios.post(`${BASE_URL}/auth/login`, {
+      username: USERNAME,
+      password: PASSWORD,
+    });
+    return response.data.token;
+  } catch (err) {
+    console.error('Login failed:', err.response?.data || err.message);
+    process.exit(1);
+  }
+}
 
 async function runCrudTests() {
-  try {
-    console.log('--- Starting CRUD tests ---');
+  console.log('--- Starting CRUD tests ---');
+  
+  const token = await getAuthToken();
+  const headers = { Authorization: `Bearer ${token}` };
 
-    // 1. CREATE an inventory item
-    const newItem = {
-      itemName: 'Automated Test Item',
-      quantity: 5,
-      price: 25.5,
-      location: 'Test Warehouse',
-    };
-    const createRes = await axios.post(API_BASE, newItem);
+  try {
+    // CREATE
+    const createRes = await axios.post(
+      `${BASE_URL}/inventory`,
+      {
+        itemName: 'Automated Test Item',
+        quantity: 5,
+        price: 25.5,
+        location: 'Test Warehouse',
+      },
+      { headers }
+    );
     console.log('CREATE response:', createRes.data);
 
     const createdId = createRes.data._id;
-    if (!createdId) throw new Error('Create failed: No ID returned');
 
-    // 2. READ all items
-    const readAllRes = await axios.get(API_BASE);
+    // READ ALL
+    const readAllRes = await axios.get(`${BASE_URL}/inventory`, { headers });
     console.log('READ ALL response:', readAllRes.data);
 
-    // 3. READ the created item by ID
-    const readOneRes = await axios.get(`${API_BASE}/${createdId}`);
+    // READ ONE
+    const readOneRes = await axios.get(`${BASE_URL}/inventory/${createdId}`, { headers });
     console.log('READ ONE response:', readOneRes.data);
 
-    // 4. UPDATE the created item
-    const updatedData = {
-      quantity: 10,
-      price: 30.0,
-      location: 'Updated Warehouse',
-    };
-    const updateRes = await axios.put(`${API_BASE}/${createdId}`, updatedData);
+    // UPDATE
+    const updateRes = await axios.put(
+      `${BASE_URL}/inventory/${createdId}`,
+      {
+        itemName: 'Automated Test Item',
+        quantity: 10,
+        price: 30,
+        location: 'Updated Warehouse',
+      },
+      { headers }
+    );
     console.log('UPDATE response:', updateRes.data);
 
-    // 5. DELETE the created item
-    const deleteRes = await axios.delete(`${API_BASE}/${createdId}`);
+    // DELETE
+    const deleteRes = await axios.delete(`${BASE_URL}/inventory/${createdId}`, { headers });
     console.log('DELETE response:', deleteRes.data);
 
     console.log('--- CRUD tests completed successfully ---');
   } catch (err) {
-    console.error('CRUD test error:', err.response ? err.response.data : err.message);
+    console.error('CRUD test error:', err.response?.data || err.message);
   }
 }
 
