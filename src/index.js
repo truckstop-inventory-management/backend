@@ -10,6 +10,10 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5050;
+const allowedOrigins = [
+  'https://truckstop-inventory-management.netlify.app',  // no trailing slash here
+  'http://localhost:5173'
+];
 
 // Connect to MongoDB (make sure your connection string is correct)
 mongoose.connect(process.env.MONGO_URI, {
@@ -20,7 +24,7 @@ mongoose.connect(process.env.MONGO_URI, {
 .catch(err => console.error('❌ MongoDB connection error:', err));
 
 // Middleware
-app.use(cors({ origin: 'https://truckstop-inventory-management.netlify.app/' }));
+app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
 
 // Routes
