@@ -1,6 +1,6 @@
 import express from 'express';
 import {
-  getInventory,
+  getAllInventory,
   getInventoryById,
   createInventory,
   updateInventory,
@@ -11,6 +11,7 @@ import { protect } from '../middleware/authMiddleware.js';
 const router = express.Router();
 
 router.post('/', protect, createInventory);
+router.get('/', protect, getAllInventory);        // Added route for GET all
 router.get('/:id', protect, getInventoryById);
 router.put('/:id', protect, updateInventory);
 router.delete('/:id', protect, deleteInventory);
