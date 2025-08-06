@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import inventoryRoutes from './routes/inventoryRoutes.js';
 import authRoutes from './routes/authRoutes.js';
+import { getValidToken } from './utils/tokenManager.js';
 
 dotenv.config();
 
@@ -65,5 +66,9 @@ app.get('/api/db-check', async (req, res) => {
     res.status(500).json({ message: 'MongoDB connection failed', error: err.message });
   }
 });
+
+getValidToken()
+  .then(() => console.log('🔑 Initial token fetched and ready'))
+  .catch(err => console.error('❌ Failed to fetch initial token:', err.message));
 
 app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
