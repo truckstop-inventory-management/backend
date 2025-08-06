@@ -31,11 +31,13 @@ export async function fetchToken() {
 }
 
 export async function getValidToken() {
-  const now = Date.now();
-  if (!token || !expiresAt || now >= expiresAt - 60000) {
-    console.log('🔄 Refreshing token...');
-    await fetchToken();
-  }
-  // ❌ Remove any log about expiry here to avoid duplicate Invalid Date
-  return token;
+  const url = process.env.BACKEND_URL;
+  if (!url) throw new Error('Missing BACKEND_URL');
+
+  const response = await axios.post(`${url}/api/auth/login`, {
+    username: process.env.ADMIN_USERNAME,
+    password: process.env.ADMIN_PASSWORD
+  });
+
+  return response.data.token;
 }
