@@ -5,6 +5,7 @@ import {
   createInventory,
   updateInventory,
   deleteInventory,
+  deleteAllInventory
 } from '../controllers/inventoryController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
@@ -15,5 +16,6 @@ router.get('/', protect, getAllInventory);        // Added route for GET all
 router.get('/:id', protect, getInventoryById);
 router.put('/:id', protect, updateInventory);
 router.delete('/:id', protect, deleteInventory);
+router.deleteAllInventory('/', protect, deleteAllInventory);
 
 export default router;

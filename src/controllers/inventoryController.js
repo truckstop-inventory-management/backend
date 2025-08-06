@@ -47,4 +47,15 @@ export const deleteInventory = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
+  
+};
+
+// DELETE /api/inventory (delete all items)
+export const deleteAllInventory = async (req, res) => {
+  try {
+    await Inventory.deleteMany({ user: req.user._id });
+    res.status(200).json({ message: 'All inventory items deleted.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to delete inventory', error: err.message });
+  }
 };
