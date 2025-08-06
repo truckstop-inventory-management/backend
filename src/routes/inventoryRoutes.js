@@ -15,7 +15,8 @@ router.post('/', protect, createInventory);
 router.get('/', protect, getAllInventory);        // Added route for GET all
 router.get('/:id', protect, getInventoryById);
 router.put('/:id', protect, updateInventory);
-router.delete('/:id', protect, deleteAllInventory);
-// router.deleteAllInventory('/', protect, deleteAllInventory);
+router.delete('/:id', protect, deleteInventory);          // for deleting one item
+router.delete('/', protect, deleteAllInventory);          // for deleting all items
+
 
 export default router;
