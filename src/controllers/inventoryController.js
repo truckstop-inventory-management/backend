@@ -39,16 +39,16 @@ export const updateInventory = async (req, res) => {
   }
 };
 
-export const deleteInventory = async (req, res) => {
-  try {
-    const deletedItem = await Inventory.findByIdAndDelete(req.params.id);
-    if (!deletedItem) return res.status(404).json({ message: 'Item not found' });
-    res.json({ message: 'Item deleted' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+// export const deleteInventory = async (req, res) => {
+//   try {
+//     const deletedItem = await Inventory.findByIdAndDelete(req.params.id);
+//     if (!deletedItem) return res.status(404).json({ message: 'Item not found' });
+//     res.json({ message: 'Item deleted' });
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
   
-};
+// };
 
 // DELETE /api/inventory (delete all items)
 export const deleteAllInventory = async (req, res) => {
