@@ -1,8 +1,13 @@
 import Inventory from '../models/inventoryModel.js';
 
+// Create
 export const createInventory = async (req, res) => {
   try {
-    const newItem = new Inventory(req.body);
+    const body = {
+      ...req.body,
+      lastUpdated: req.body.lastUpdated ? new Date(req.body.lastUpdated) : new Date(),
+    };
+    const newItem = new Inventory(body);
     const savedItem = await newItem.save();
     res.status(201).json(savedItem);
   } catch (error) {
@@ -10,6 +15,7 @@ export const createInventory = async (req, res) => {
   }
 };
 
+// Get all
 export const getAllInventory = async (req, res) => {
   try {
     const items = await Inventory.find();
@@ -19,6 +25,7 @@ export const getAllInventory = async (req, res) => {
   }
 };
 
+// Get by ID
 export const getInventoryById = async (req, res) => {
   try {
     const item = await Inventory.findById(req.params.id);
@@ -29,16 +36,39 @@ export const getInventoryById = async (req, res) => {
   }
 };
 
+// Update with Last-Write-Wins
 export const updateInventory = async (req, res) => {
   try {
-    const updatedItem = await Inventory.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!updatedItem) return res.status(404).json({ message: 'Item not found' });
+    const id = req.params.id;
+    const serverDoc = await Inventory.findById(id);
+    if (!serverDoc) return res.status(404).json({ message: 'Item not found' });
+
+    const clientTs = req.body.lastUpdated ? new Date(req.body.lastUpdated).getTime() : 0;
+    const serverTs = new Date(serverDoc.lastUpdated).getTime();
+
+    // If client is older → reject with 409 + server copy
+    if (clientTs < serverTs) {
+      return res.status(409).json({
+        message: 'Conflict: client is older than server',
+        server: serverDoc.toObject(),
+      });
+    }
+
+    // Accept update (newer or equal)
+    serverDoc.itemName = req.body.itemName ?? serverDoc.itemName;
+    serverDoc.quantity = typeof req.body.quantity === 'number' ? req.body.quantity : serverDoc.quantity;
+    serverDoc.price = typeof req.body.price === 'number' ? req.body.price : serverDoc.price;
+    serverDoc.location = req.body.location ?? serverDoc.location;
+    serverDoc.lastUpdated = req.body.lastUpdated ? new Date(req.body.lastUpdated) : new Date();
+
+    const updatedItem = await serverDoc.save();
     res.json(updatedItem);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 };
 
+// Delete one
 export const deleteInventory = async (req, res) => {
   try {
     const deletedItem = await Inventory.findByIdAndDelete(req.params.id);
@@ -47,10 +77,9 @@ export const deleteInventory = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
-  
 };
 
-// DELETE /api/inventory (delete all items)
+// Delete all
 export const deleteAllInventory = async (req, res) => {
   try {
     await Inventory.deleteMany({ user: req.user._id });
