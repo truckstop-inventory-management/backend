@@ -93,7 +93,6 @@ dist
 
 # vuepress v2.x temp and cache directory
 .temp
-.cache
 
 # Sveltekit cache directory
 .svelte-kit/
@@ -144,3 +143,31 @@ vite.config.ts.timestamp-*
 
 dist/
 logs/
+
+# JetBrains IDE files
+.idea/
+*.iml
+
+# User-specific stuff
+*.iws
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/dictionaries
+.idea/**/shelf
+
+# Generated files / caches
+.idea/**/contentModel.xml
+.idea/**/dataSources/
+.idea/**/dataSources.ids
+.idea/**/dataSources.local.xml
+.idea/**/sqlDataSources.xml
+.idea/**/dynamic.xml
+.idea/**/uiDesigner.xml
+.idea/**/gradle.xml
+.idea/**/libraries
+
+# IDE logs
+.idea/**/usage.statistics.xml
+
+# Optional: Node/React standard ignores (if not already there)
+build/
