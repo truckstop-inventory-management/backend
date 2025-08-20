@@ -87,9 +87,24 @@ export const updateInventory = async (req, res) => {
 // Delete one
 export const deleteInventory = async (req, res) => {
   try {
-    const deletedItem = await Inventory.findByIdAndDelete(req.params.id);
-    if (!deletedItem) return res.status(404).json({ message: 'Item not found' });
-    res.json({ message: 'Item deleted' });
+    const { id } = req.params;
+
+    // First try by _id
+    let deletedItem = await Inventory.findByIdAndDelete(id);
+
+    // If not found, try by composite key (name + location)
+    if (!deletedItem) {
+      const { itemName, location } = req.body || {};
+      if (itemName && location) {
+        deletedItem = await Inventory.findOneAndDelete({ itemName, location });
+      }
+    }
+
+    if (!deletedItem) {
+      return res.status(404).json({ message: 'Item not found' });
+    }
+
+    res.json({ message: 'Item deleted', deleted: deletedItem });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
