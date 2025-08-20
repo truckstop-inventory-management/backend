@@ -34,7 +34,7 @@ export const createInventory = async (req, res) => {
 // Get all
 export const getAllInventory = async (req, res) => {
   try {
-    const items = await Inventory.find();
+    const items = await Inventory.find({ isDeleted: { $ne: true } });
     res.json(items);
   } catch (error) {
     res.status(500).json({ message: error.message });
