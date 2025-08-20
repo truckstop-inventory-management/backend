@@ -3,10 +3,26 @@ import Inventory from '../models/inventoryModel.js';
 // Create
 export const createInventory = async (req, res) => {
   try {
+    const { itemName, location, quantity, price } = req.body;
+
+    if (!itemName || !location) {
+      return res.status(400).json({ message: "itemName and location are required" });
+    }
+
+    // 🔍 Check for existing item with same name + location
+    const existing = await Inventory.findOne({ itemName, location });
+    if (existing) {
+      return res.status(409).json({ message: "Item already exists, please update instead" });
+    }
+
     const body = {
-      ...req.body,
+      itemName,
+      location,
+      quantity: typeof quantity === "number" ? quantity : 0,
+      price: typeof price === "number" ? price : 0,
       lastUpdated: req.body.lastUpdated ? new Date(req.body.lastUpdated) : new Date(),
     };
+
     const newItem = new Inventory(body);
     const savedItem = await newItem.save();
     res.status(201).json(savedItem);
