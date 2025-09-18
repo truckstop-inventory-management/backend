@@ -14,7 +14,10 @@ const PORT = process.env.PORT || 5050;
 // CORS allowed origins
 const allowedOrigins = [
   'https://truckstop-inventory-management.netlify.app',
-  'http://localhost:5173'
+  "capacitor://localhost",
+  "http://localhost",
+  "https://localhost",
+  "http://127.0.0.1",
 ];
 
 // CORS middleware with dynamic origin check ignoring trailing slash
