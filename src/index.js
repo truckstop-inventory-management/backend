@@ -15,8 +15,9 @@ const PORT = process.env.PORT || 5050;
 const allowedOrigins = [
   'https://truckstop-inventory-management.netlify.app',
   "capacitor://localhost",
-  "http://localhost",
-  "https://localhost",
+  "capacitor://localhost:5173",
+  "http://localhost:5173",
+  "https://localhost:5173",
   "http://127.0.0.1",
 ];
 
