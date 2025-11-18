@@ -46,9 +46,6 @@ mongoose
   .connect(
     process.env.MONGODB_URI
     || 'mongodb+srv://admin:admin@truckstop-inventory-clu.ioozj2k.mongodb.net/?retryWrites=true&w=majority&appName=truckstop-inventory-cluster',
-    {
-      // No need for useNewUrlParser or useUnifiedTopology options anymore
-    },
   )
   .then(() => console.log('✅ Connected to MongoDB Atlas'))
   .catch((err) => console.error('❌ MongoDB connection error:', err));
