@@ -82,17 +82,6 @@ getValidToken()
   .catch((err) => console.error('❌ Failed to fetch initial token:', err.message));
 
 app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
-~~~~js
-
----
-
-## 2️⃣ Replace `backend/src/routes/metricsRoutes.js` with this **minimal** router
-
-  Right now this file still has validation + controller code in it. We want it to be **only routing**, because the controller already exists in `metricsController.js`.
-
-~~~~js
-// backend/src/routes/metricsRoutes.js
-// Metrics routes — Phase 7: Server-Side Metrics Persistence
 
 import express from 'express';
 import {
