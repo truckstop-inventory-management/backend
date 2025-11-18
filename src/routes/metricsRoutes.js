@@ -20,6 +20,25 @@ router.get('/lookup', getMetricsHealth);
 router.post('/lookup', ingestMetrics);
 
 export default router;
+~~~~js
+
+---
+
+## ✅ 2) `backend/src/controllers/metricsController.js` (all the logic)
+
+Create/replace this file with:
+
+~~~~js
+// backend/src/controllers/metricsController.js
+// -----------------------------------------------------------------------------
+// Metrics Controller — Phase 7: Server-Side Metrics Persistence
+// -----------------------------------------------------------------------------
+//
+// Responsibilities:
+//   - Validate incoming lookup metrics batches
+//   - Persist them to an append-only JSONL log (prototype storage)
+//   - Return structured responses with serverTimestamp
+// -----------------------------------------------------------------------------
 
 import fs from 'fs';
 import path from 'path';
@@ -77,7 +96,12 @@ function validateAndNormalizePayload(payload) {
       const item = rawItem || {};
       const itemErrors = [];
 
-      const { type, barcode, latencyMs, timestamp } = item;
+      const {
+        type,
+        barcode,
+        latencyMs,
+        timestamp,
+      } = item;
 
       if (!isNonEmptyString(type)) {
         itemErrors.push('type must be a non-empty string.');
@@ -178,3 +202,10 @@ export async function ingestMetrics(req, res) {
     });
   }
 }
+
+// Export internals for potential unit tests
+export const _internal = {
+  validateAndNormalizePayload,
+  appendMetricsToFile,
+  LOG_FILE_PATH,
+};
