@@ -26,9 +26,9 @@ const allowedOrigins = [
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin) return callback(null, true); // Allow requests like Postman or server-to-server
+      if (!origin) return callback(null, true); // Allow Postman/server-to-server requests
 
-      const originNoSlash = origin.replace(/\/$/, ''); // Remove trailing slash if any
+      const originNoSlash = origin.replace(/\/$/, '');
 
       if (allowedOrigins.includes(originNoSlash)) {
         callback(null, true);
@@ -47,8 +47,8 @@ mongoose
     process.env.MONGODB_URI
     || 'mongodb+srv://admin:admin@truckstop-inventory-clu.ioozj2k.mongodb.net/?retryWrites=true&w=majority&appName=truckstop-inventory-cluster',
   )
-  .then(() => console.log('✅ Connected to MongoDB Atlas'))
-  .catch((err) => console.error('❌ MongoDB connection error:', err));
+  .then(() => console.log('Connected to MongoDB Atlas'))
+  .catch((err) => console.error('MongoDB connection error:', err));
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -66,35 +66,29 @@ app.get('/test', (req, res) => {
 app.get('/api/db-check', async (req, res) => {
   try {
     const dbState = mongoose.connection.readyState;
+
     if (dbState === 1) {
       res.json({ message: 'Connected to MongoDB' });
     } else {
-      res.status(500).json({ message: 'MongoDB connection not ready', state: dbState });
+      res.status(500).json({
+        message: 'MongoDB connection not ready',
+        state: dbState,
+      });
     }
   } catch (err) {
     console.error('DB connection failed:', err.message);
-    res.status(500).json({ message: 'MongoDB connection failed', error: err.message });
+    res.status(500).json({
+      message: 'MongoDB connection failed',
+      error: err.message,
+    });
   }
 });
 
+// Token initialization
 getValidToken()
-  .then(() => console.log('🔑 Initial token fetched and ready'))
-  .catch((err) => console.error('❌ Failed to fetch initial token:', err.message));
+  .then(() => console.log('Initial token fetched and ready'))
+  .catch((err) => console.error('Failed to fetch initial token:', err.message));
 
-app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
-
-import express from 'express';
-import {
-  ingestMetrics,
-  getMetricsHealth,
-} from '../controllers/metricsController.js';
-
-const router = express.Router();
-
-// GET  /api/metrics/lookup   → health/info
-router.get('/lookup', getMetricsHealth);
-
-// POST /api/metrics/lookup   → ingest metrics batch
-router.post('/lookup', ingestMetrics);
-
-export default router;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
+});
