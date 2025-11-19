@@ -15,6 +15,7 @@ import path from 'path';
 // Where to persist metrics (append-only JSONL file)
 const DATA_DIR = path.join(process.cwd(), 'data');
 const LOG_FILE_PATH = path.join(DATA_DIR, 'metrics-log.jsonl');
+const METRICS_LOG_PATH = path.join(process.cwd(), 'data', 'metrics-log.jsonl');
 
 // Ensure data directory exists -------------------------------------------------
 function ensureDataDir() {
@@ -168,6 +169,49 @@ export async function ingestMetrics(req, res) {
       ok: false,
       error: 'Failed to persist metrics.',
       serverTimestamp,
+    });
+  }
+}
+
+export async function getRecentMetricsPreview(req, res) {
+  try {
+    const limitRaw = req.query.limit;
+    const limit = Number.isFinite(Number(limitRaw)) && Number(limitRaw) > 0
+      ? Math.min(Number(limitRaw), 200)
+      : 20; // default: last 20 entries, max 200
+
+    if (!fs.existsSync(METRICS_LOG_PATH)) {
+      return res.status(200).json({
+        ok: true,
+        message: 'metrics-log.jsonl does not exist yet',
+        items: [],
+      });
+    }
+
+    const fileContent = await fs.promises.readFile(METRICS_LOG_PATH, 'utf8');
+    const lines = fileContent
+      .split('\n')
+      .map(line => line.trim())
+      .filter(Boolean);
+
+    const recent = lines.slice(-limit).map((line, index) => {
+      try {
+        return JSON.parse(line);
+      } catch {
+        return { parseError: true, lineIndex: lines.length - limit + index, raw: line };
+      }
+    });
+
+    return res.status(200).json({
+      ok: true,
+      count: recent.length,
+      items: recent,
+    });
+  } catch (err) {
+    console.error('getRecentMetricsPreview error:', err);
+    return res.status(500).json({
+      ok: false,
+      error: 'Failed to read metrics-log.jsonl',
     });
   }
 }
