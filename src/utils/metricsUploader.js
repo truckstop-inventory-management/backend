@@ -13,7 +13,7 @@
 // polling or by reading the exported accessors.
 // -----------------------------------------------------------------------------
 
-const METRICS_ENDPOINT = '/api/metrics';
+const METRICS_ENDPOINT = '/api/metrics/lookup';
 
 // In-memory queue of metric items waiting to be uploaded.
 // Shape per item:
@@ -191,7 +191,7 @@ export async function flushMetrics(options = {}) {
       );
 
       // eslint-disable-next-line no-await-in-loop
-      const res = await fetch('/api/metrics/lookup', {
+      const res = await fetch(METRICS_ENDPOINT, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
