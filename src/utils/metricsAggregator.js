@@ -198,3 +198,13 @@ module.exports = {
   JSONL_PATH,
   META_KEY_LAST_TS,
 };
+
+export const metricsAggregator = {
+  async runFullBackfill() {
+    // read entire JSONL → write aggregates
+  },
+
+  async runIncremental() {
+    // read new lines only
+  }
+};

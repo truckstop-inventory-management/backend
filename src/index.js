@@ -6,6 +6,7 @@ import inventoryRoutes from './routes/inventoryRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import metricsRoutes from './routes/metricsRoutes.js';
 import { getValidToken } from './utils/tokenManager.js';
+import metricsV2Routes from './routes/metricsV2Routes.js';
 
 dotenv.config();
 
@@ -54,6 +55,7 @@ mongoose
 app.use('/api/auth', authRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/metrics', metricsRoutes);
+app.use('/api/metrics/v2', metricsV2Routes);
 
 app.get('/', (req, res) => res.send('Truckstop Inventory API is running'));
 
