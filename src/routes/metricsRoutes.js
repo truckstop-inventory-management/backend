@@ -1,4 +1,5 @@
 // backend/src/routes/metricsRoutes.js
+
 import express from 'express';
 import {
   ingestMetrics,

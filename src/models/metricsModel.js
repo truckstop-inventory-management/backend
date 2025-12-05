@@ -1,4 +1,5 @@
-// Phase 8 — Models for aggregated metrics
+//src/models/metricsModel.js
+
 export const MetricsModel = {
   initSchema() {
     // tables created by aggregator; placeholder

@@ -1,5 +1,4 @@
 // backend/src/routes/metricsAggRoutes.js
-// Phase 8 metrics aggregation routes.
 
 const express = require("express");
 const {

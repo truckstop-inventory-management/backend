@@ -1,3 +1,5 @@
+//src/models/inventoryModel.js
+
 import mongoose from 'mongoose';
 
 const InventoryItemSchema = new mongoose.Schema({

@@ -1,3 +1,5 @@
+//src/middleware/ensureValidToken.js
+
 import { getValidToken } from '../utils/tokenManager.js';
 
 export async function ensureValidToken(req, res, next) {

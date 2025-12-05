@@ -1,37 +1,50 @@
 // backend/src/utils/metricsAggregator.js
-// Reads metrics-log.jsonl and aggregates into SQLite tables for Phase 8.
 
-const fs = require("fs");
-const path = require("path");
-const readline = require("readline");
-const { getDb, getMeta, setMeta } = require("./metricsDb");
+import fs from 'fs';
+import path from 'path';
+import readline from 'readline';
+import { fileURLToPath } from 'url';
+import { getDb, getMeta, setMeta } from './metricsDb.js';
+import { loadOffset, saveOffset } from './metricsOffset.js';
 
-const JSONL_PATH = path.join(__dirname, "..", "..", "data", "metrics-log.jsonl");
-const META_KEY_LAST_TS = "metrics_last_processed_timestamp_ms";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+export const JSONL_PATH = path.join(
+  __dirname,
+  '..',
+  '..',
+  'data',
+  'metrics-log.jsonl',
+);
+export const META_KEY_LAST_TS = 'metrics_last_processed_timestamp_ms';
 
 // Latency buckets we want to track.
 const LATENCY_BUCKETS = [
-  { label: "0-10", from: 0, to: 10 },
-  { label: "10-25", from: 10, to: 25 },
-  { label: "25-100", from: 25, to: 100 },
-  { label: "100+", from: 100, to: Infinity },
+  { label: '0-10', from: 0, to: 10 },
+  { label: '10-25', from: 10, to: 25 },
+  { label: '25-100', from: 25, to: 100 },
+  { label: '100+', from: 100, to: Infinity },
 ];
 
 function toDateKey(timestampMs) {
   const d = new Date(timestampMs);
   const year = d.getUTCFullYear();
-  const month = String(d.getUTCMonth() + 1).padStart(2, "0");
-  const day = String(d.getUTCDate()).padStart(2, "0");
+  const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(d.getUTCDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
 
 function classifyResultType(event) {
-  if (event.resultType === "hit" || event.resultType === "miss" || event.resultType === "error") {
+  if (
+    event.resultType === 'hit' ||
+    event.resultType === 'miss' ||
+    event.resultType === 'error'
+  ) {
     return event.resultType;
   }
-  // Fallbacks based on shape.
-  if (event.error || event.type === "error") return "error";
-  return "hit"; // default optimistic
+  if (event.error || event.type === 'error') return 'error';
+  return 'hit'; // default optimistic
 }
 
 function bucketLabelForLatency(latencyMs) {
@@ -40,24 +53,37 @@ function bucketLabelForLatency(latencyMs) {
       return bucket.label;
     }
   }
-  return "100+";
+  return '100+';
+}
+
+function computePercentile(values, percentile) {
+  if (!values.length) return null;
+  const sorted = [...values].sort((a, b) => a - b);
+  const idx = Math.floor((percentile / 100) * (sorted.length - 1));
+  return sorted[idx];
 }
 
 /**
  * Aggregate new events from JSONL into SQLite.
  * Returns { processedCount, maxTimestampMs }.
  */
-async function aggregateNewMetrics(jsonlPath = JSONL_PATH) {
+export async function aggregateNewMetrics(jsonlPath = JSONL_PATH) {
   const db = getDb();
 
   if (!fs.existsSync(jsonlPath)) {
     return { processedCount: 0, maxTimestampMs: null };
   }
 
-  const lastProcessedTs =
-    Number(getMeta(META_KEY_LAST_TS, 0)) || 0;
+  const lastProcessedTs = Number(getMeta(META_KEY_LAST_TS, 0)) || 0;
 
-  const fileStream = fs.createReadStream(jsonlPath, { encoding: "utf8" });
+  // File-offset tracking: start reading from the last known byte offset.
+  const { lastOffset = 0 } = loadOffset();
+
+  const fileStream = fs.createReadStream(jsonlPath, {
+    encoding: 'utf8',
+    start: lastOffset,
+  });
+
   const rl = readline.createInterface({
     input: fileStream,
     crlfDelay: Infinity,
@@ -74,7 +100,7 @@ async function aggregateNewMetrics(jsonlPath = JSONL_PATH) {
     let event;
     try {
       event = JSON.parse(trimmed);
-    } catch (_err) {
+    } catch {
       // Malformed line; skip.
       continue;
     }
@@ -108,9 +134,9 @@ async function aggregateNewMetrics(jsonlPath = JSONL_PATH) {
     stats.total += 1;
     stats.latencies.push(latencyMs);
 
-    if (resultType === "hit") stats.hits += 1;
-    else if (resultType === "miss") stats.misses += 1;
-    else if (resultType === "error") stats.errors += 1;
+    if (resultType === 'hit') stats.hits += 1;
+    else if (resultType === 'miss') stats.misses += 1;
+    else if (resultType === 'error') stats.errors += 1;
 
     const currentBucketCount = stats.bucketCounts.get(bucketLabel) || 0;
     stats.bucketCounts.set(bucketLabel, currentBucketCount + 1);
@@ -146,13 +172,6 @@ async function aggregateNewMetrics(jsonlPath = JSONL_PATH) {
       count = lookup_latency_buckets.count + excluded.count
   `);
 
-  const computePercentile = (values, percentile) => {
-    if (!values.length) return null;
-    const sorted = [...values].sort((a, b) => a - b);
-    const idx = Math.floor((percentile / 100) * (sorted.length - 1));
-    return sorted[idx];
-  };
-
   const tx = db.transaction(() => {
     for (const [date, stats] of perDay.entries()) {
       const avg =
@@ -187,24 +206,21 @@ async function aggregateNewMetrics(jsonlPath = JSONL_PATH) {
 
   tx();
 
+  // Update file offset after a successful transaction.
+  const newOffset = lastOffset + (fileStream.bytesRead || 0);
+  saveOffset(newOffset);
+
   return {
     processedCount: processed,
     maxTimestampMs: maxTs,
   };
 }
 
-module.exports = {
-  aggregateNewMetrics,
-  JSONL_PATH,
-  META_KEY_LAST_TS,
-};
+export async function runFullBackfill() {
+  // Currently same as incremental; in future could reset META_KEY_LAST_TS.
+  return aggregateNewMetrics(JSONL_PATH);
+}
 
-export const metricsAggregator = {
-  async runFullBackfill() {
-    // read entire JSONL → write aggregates
-  },
-
-  async runIncremental() {
-    // read new lines only
-  }
-};
+export async function runIncremental() {
+  return aggregateNewMetrics(JSONL_PATH);
+}

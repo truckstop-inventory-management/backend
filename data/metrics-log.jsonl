@@ -1,0 +1,4 @@
+{"timestamp": 1732500000000, "type": "hit", "latencyMs": 12}
+{"timestamp": 1732500100000, "type": "hit", "latencyMs": 8}
+{"timestamp": 1732500200000, "type": "miss", "latencyMs": 35}
+{"timestamp": 1732500300000, "type": "error", "latencyMs": 60}

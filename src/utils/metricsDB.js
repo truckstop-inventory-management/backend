@@ -1,11 +1,14 @@
 // backend/src/utils/metricsDb.js
-// SQLite wrapper for Phase 8 metrics aggregation.
 
-const path = require("path");
-const fs = require("fs");
-const Database = require("better-sqlite3");
+import path from 'path';
+import fs from 'fs';
+import Database from 'better-sqlite3';
+import { fileURLToPath } from 'url';
 
-const DB_PATH = path.join(__dirname, "..", "..", "data", "metrics.db");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const DB_PATH = path.join(__dirname, '..', '..', 'data', 'metrics.db');
 
 let dbInstance = null;
 
@@ -49,17 +52,17 @@ function initSchema(db) {
   `).run();
 }
 
-function getDb() {
+export function getDb() {
   if (dbInstance) return dbInstance;
 
   ensureDirExists(path.dirname(DB_PATH));
   dbInstance = new Database(DB_PATH);
-  dbInstance.pragma("journal_mode = WAL");
+  dbInstance.pragma('journal_mode = WAL');
   initSchema(dbInstance);
   return dbInstance;
 }
 
-function getMeta(key, defaultValue = null) {
+export function getMeta(key, defaultValue = null) {
   const db = getDb();
   const row = db
     .prepare(`SELECT value FROM metrics_meta WHERE key = ?`)
@@ -69,7 +72,7 @@ function getMeta(key, defaultValue = null) {
   return Number.isNaN(num) ? row.value : num;
 }
 
-function setMeta(key, value) {
+export function setMeta(key, value) {
   const db = getDb();
   db.prepare(
     `
@@ -80,9 +83,4 @@ function setMeta(key, value) {
   ).run(key, String(value));
 }
 
-module.exports = {
-  getDb,
-  getMeta,
-  setMeta,
-  DB_PATH,
-};
+export { DB_PATH };

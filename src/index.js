@@ -1,12 +1,17 @@
+//src/index.js
+
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+
 import inventoryRoutes from './routes/inventoryRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import metricsRoutes from './routes/metricsRoutes.js';
-import { getValidToken } from './utils/tokenManager.js';
 import metricsV2Routes from './routes/metricsV2Routes.js';
+import metricsApiRoutes from './routes/metricsApiRoutes.js'; // ← add this
+
+import { getValidToken } from './utils/tokenManager.js';
 
 dotenv.config();
 
@@ -56,6 +61,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/metrics', metricsRoutes);
 app.use('/api/metrics/v2', metricsV2Routes);
+// Phase 8 read-only metrics endpoints (summary, histogram, daily-rollup)
+app.use('/api/metrics', metricsApiRoutes);
 
 app.get('/', (req, res) => res.send('Truckstop Inventory API is running'));
 

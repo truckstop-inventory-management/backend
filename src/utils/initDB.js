@@ -1,3 +1,5 @@
+//src/utils/initDB.js
+
 import nano from 'nano';
 import dotenv from 'dotenv';
 dotenv.config();

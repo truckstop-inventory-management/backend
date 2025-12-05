@@ -1,4 +1,5 @@
-// Phase 8 — Server-side aggregated metrics API
+//src/controller/metricsV2Controller.js
+
 
 export const metricsV2Controller = {
   async getSummary(req, res) {
